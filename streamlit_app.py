@@ -23,10 +23,10 @@ def main():
 
     # User inputs for profiles and report date
     st.header("Upload CSV files")
-    acc_profile = load_data("accprofile")
-    video_profile = load_data("videoprofile")
-    pv_profile = load_data("pv")
-    ot_profile = load_data("ot")
+    acc_profile = load_data("Acc profile")
+    video_profile = load_data("Video profile")
+    pv_profile = load_data("Payment Verification")
+    ot_profile = load_data("Online Transaction")
 
     report_date = st.date_input("Select the Report Date")
 
@@ -68,7 +68,7 @@ def main():
         pivot_table_acc = pivot_table_acc.reset_index()
         pivot_table_acc = pivot_table_acc[['Region', 'Data Service Type', 'Active', 'Inactive', 'Suspended', 'All']]
 
-        st.header("Account Profile Wise Retail- Data Status Pivot Table")
+        st.header("Account Profile Wise Retail- Data Status Region Wise")
         st.dataframe(pivot_table_acc)
 
         pivot_table_acc.to_csv('status_pivot_table.csv', index=False)
@@ -87,7 +87,7 @@ def main():
 
         pivot_table_video = pd.pivot_table(video_profile, index=['Region'], columns='New Status', values='USERID', aggfunc='count', margins=True)
 
-        st.header("VideoPlanDetail Video Status Pivot Table")
+        st.header("VideoPlanDetail Video Status Region Wise")
         st.dataframe(pivot_table_video)
 
         # Online Transaction
@@ -95,9 +95,12 @@ def main():
         ot_profile = ot_profile[columns]
         ot_profile.rename(columns={'Plan Amount':'Selfcare Renew Amount', 'Gateway':'Selfcare Renew'}, inplace=True)
         pivot_table_ot = pd.pivot_table(ot_profile, index='Region', values=['Selfcare Renew Amount', 'Selfcare Renew'], aggfunc={'Selfcare Renew Amount': 'sum', 'Selfcare Renew': 'count'}, margins=True)
-
-        st.header("Online Transaction Pivot Table")
+        pivot_table_gateway = pd.pivot_table(ot_profile, index='Selfcare Renew', values=['Selfcare Renew', 'Selfcare Renew Amount'], aggfunc={'Selfcare Renew': 'count', 'Selfcare Renew Amount': 'sum'}, margins=True)
+        st.header("Online Transaction Region Wise")
         st.dataframe(pivot_table_ot)
+
+        st.header("Online Transaction Gateway Wise")
+        st.dataframe(pivot_table_gateway)
 
         # Payment Verification-All
         pv_profile['Region'].fillna('Inside Valley', inplace=True)
@@ -106,7 +109,7 @@ def main():
         pv_profile.rename(columns={'PaidAmount':'Today Collection'}, inplace=True)
         pivot_table_pv = pd.pivot_table(pv_profile, index='Region', values='Today Collection', aggfunc='sum', margins=True)
 
-        st.header("Payment Verification-All Pivot Table")
+        st.header("Payment Verification-All Gateway Wise")
         st.dataframe(pivot_table_pv)
 
         # ... (Update CSV files here as required)
